@@ -1,6 +1,7 @@
 import mysql.connector
 import bcrypt
 
+
 def client_user(name_user, pass_user, mail_user, type_user, cpf_user=None):
     try:
         conexao = mysql.connector.connect(
@@ -35,7 +36,6 @@ def client_user(name_user, pass_user, mail_user, type_user, cpf_user=None):
         conexao.commit()
         
     except mysql.connector.Error as err:
-        print(f"Erro: {err}")
         return f"Erro: {err}"
     
     finally:
@@ -60,7 +60,6 @@ def add_agendamento(data_agendamento, nome_agendamento, hora_agendamento, descri
         cursor.fetchall()
 
         parametros = (data_agendamento, nome_agendamento, hora_agendamento, descricao_agendamento, status_agendamento)
-        print(parametros)
         # if parametros():
         comando = '''
             INSERT INTO tb_agendamento (data, nome, hora, descricao, status)
@@ -71,7 +70,6 @@ def add_agendamento(data_agendamento, nome_agendamento, hora_agendamento, descri
 
 
     except mysql.connector.Error as err:
-        print(f"Erro: {err}")
         return f"Erro: {err}"
     
     finally:
@@ -81,3 +79,55 @@ def add_agendamento(data_agendamento, nome_agendamento, hora_agendamento, descri
     return "Dados inseridos com sucesso!"
 # READ
 
+
+# READ
+# comando = f'SELECT * FROM vendas'
+# cursor.execute(comando)
+# resultado = cursor.fetchall() # Ler o banco de dados
+# print(resultado)
+
+def verificar_horarios_disponivel(param_hora, param_date):
+    conexao = mysql.connector.connect(
+            host='localhost',
+            user='root',
+            password='0511',
+            database='bd_barbearia'
+        )
+    cursor = conexao.cursor()
+
+    comando_select_hora = f"SELECT DATE_FORMAT(hora, '%H:%i') AS horario FROM tb_agendamento;"
+    cursor.execute(comando_select_hora)
+    resultado_hora = cursor.fetchall()
+    lista = []
+    for i in resultado_hora:
+        hora = list(i)
+
+        lista.append(hora)
+    hora_remasterizada = [lista for hora in lista for lista in hora]
+
+    comando_select_hora = f"SELECT DATE_FORMAT(data, '%d/%m') AS data_formatada FROM tb_agendamento"
+    cursor.execute(comando_select_hora)
+    resultado_date = cursor.fetchall()
+
+    date_lista = []
+    for i in resultado_date:
+        data = list(i)
+        date_lista.append(data)
+
+    date_remasterizada = [date_lista for date in date_lista for date_lista in date]
+
+
+    if param_hora in hora_remasterizada and param_date in date_remasterizada:
+        return {"status": 400}
+    else:
+        return {"status": 200}
+    
+
+
+ #PROBLEMAS COM A VERIFICAÇÃO DA DATA:
+    #SE RETORNAR UM MES QUE NAO TENHA 2 NUMEROS EX(01/12), (02,02)
+    #IRÁ ADICIONAR INFINITAMENTE POIS NO BD FICA COM O 0, 
+    #FAZER ALGORITMO PARA ADICIONAR 0 CASO ESSES MESES NÃO TENHAM POR PADRÃO
+horario = '21:30'
+data = '08/12'
+# verificar_horarios_disponivel(horario, data)

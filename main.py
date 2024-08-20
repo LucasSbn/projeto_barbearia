@@ -90,14 +90,14 @@ ex_dict_agendamento = {
 def add_agendamento():
     dados = request.get_json()
 
-    data_recebida = dados.get('data')
+    primeira_data_recebida = dados.get('data')
     nome_agendamento = dados.get('nome')
     hora_agendamento = dados.get('hora')
     descricao_agendamento = dados.get('descricao')
     status_agendamento = dados.get('status', 'P') # p = pendente // C = cancelado // F = finalizado // I = iniciado
     ano_atual = datetime.now().year
 
-    data_recebida = data_recebida.split('/')
+    data_recebida = primeira_data_recebida.split('/')
     dia = data_recebida[0]
     mes = data_recebida[1]
 
@@ -105,6 +105,18 @@ def add_agendamento():
 
     campos_necessarios = ['data', 'nome', 'hora', 'descricao']
     campos_ausentes = [campo for campo in campos_necessarios if dados.get(campo) is None]
+
+
+    func_corte_disp = bd.verificar_horarios_disponivel(hora_agendamento, primeira_data_recebida)
+    
+    print(func_corte_disp)
+    status = func_corte_disp.get("status")
+    print(status, primeira_data_recebida)
+    if status:
+        if func_corte_disp["status"] == 400:
+            return jsonify({
+                "message": "Horário indisponível"
+                }), 400
 
     if campos_ausentes:
         return jsonify({
