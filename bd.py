@@ -1,6 +1,6 @@
 import mysql.connector
 import bcrypt
-
+from datetime import datetime
 
 def client_user(name_user, pass_user, mail_user, type_user, cpf_user=None):
     try:
@@ -129,5 +129,5 @@ def verificar_horarios_disponivel(param_hora, param_date):
     #IRÁ ADICIONAR INFINITAMENTE POIS NO BD FICA COM O 0, 
     #FAZER ALGORITMO PARA ADICIONAR 0 CASO ESSES MESES NÃO TENHAM POR PADRÃO
 horario = '21:30'
-data = '08/12'
+data = '10/5'
 # verificar_horarios_disponivel(horario, data)

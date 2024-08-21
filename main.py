@@ -14,15 +14,23 @@ CORS(app)
 
 key = '05092006!'
 
+
 def validar_data(data):
     try:
-        # Tenta converter a string para um objeto datetime com o formato HH:MM
-        datetime.strptime(data, '%Y-%m-%d')
-        # data = data_datetime.date()
+        data_dividida = data.split('/')
+        if len(data_dividida[0]) != 2 or len(data_dividida[1]) != 2:
+            print(data_dividida, "Data no formato errado")
+            return False
+        
+        dia, mes = data_dividida
+        ano_atual = datetime.now().year
+        data_completa = f"{ano_atual}-{mes.zfill(2)}-{dia.zfill(2)}"
+
+        datetime.strptime(data_completa, '%Y-%m-%d')
         return True
+
     except ValueError:
         return False
-
 
     
 def validar_hora(hora):
@@ -124,10 +132,10 @@ def add_agendamento():
             "campos_ausentes": campos_ausentes
         }), 400
     
-    if not validar_data(data_recebida):
+    if not validar_data(primeira_data_recebida):
         return jsonify({
-            "error": "Formato de data inválido [AAAA/MM/DD]",
-            "data_invalida": data_recebida
+            "error": "Formato de data inválido [DD/MM]",
+            "data_invalida": primeira_data_recebida
         }), 400
     
     if not validar_hora(hora_agendamento):
