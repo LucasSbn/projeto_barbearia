@@ -79,48 +79,36 @@ def add_agendamento(data_agendamento, nome_agendamento, hora_agendamento, descri
     return "Dados inseridos com sucesso!"
 # READ
 
-
-# READ
-# comando = f'SELECT * FROM vendas'
-# cursor.execute(comando)
-# resultado = cursor.fetchall() # Ler o banco de dados
-# print(resultado)
-
 def verificar_horarios_disponivel(param_hora, param_date):
+    # Conexão com o banco de dados
     conexao = mysql.connector.connect(
-            host='localhost',
-            user='root',
-            password='0511',
-            database='bd_barbearia'
-        )
+        host='localhost',
+        user='root',
+        password='0511',
+        database='bd_barbearia'
+    )
     cursor = conexao.cursor()
 
-    comando_select_hora = f"SELECT DATE_FORMAT(hora, '%H:%i') AS horario FROM tb_agendamento;"
-    cursor.execute(comando_select_hora)
-    resultado_hora = cursor.fetchall()
-    lista = []
-    for i in resultado_hora:
-        hora = list(i)
+    # Consulta para obter data e hora dos agendamentos
+    comando_select_agendamentos = """
+        SELECT DATE_FORMAT(data, '%d/%m') AS data_formatada, 
+               DATE_FORMAT(hora, '%H:%i') AS horario 
+        FROM tb_agendamento;
+    """
+    cursor.execute(comando_select_agendamentos)
+    resultados = cursor.fetchall()
 
-        lista.append(hora)
-    hora_remasterizada = [lista for hora in lista for lista in hora]
+    # Lista de tuplas com as combinações de data e hora agendadas
+    agendamentos = [(data, hora) for data, hora in resultados]
 
-    comando_select_hora = f"SELECT DATE_FORMAT(data, '%d/%m') AS data_formatada FROM tb_agendamento"
-    cursor.execute(comando_select_hora)
-    resultado_date = cursor.fetchall()
+    # Verificação da disponibilidade
+    for data, hora in agendamentos:
+        if param_date == data and param_hora == hora:
+            return {"status": 400}  # Horário indisponível
 
-    date_lista = []
-    for i in resultado_date:
-        data = list(i)
-        date_lista.append(data)
+    # Se não encontrou conflito
+    return {"status": 200}  # Horário disponível
 
-    date_remasterizada = [date_lista for date in date_lista for date_lista in date]
-
-
-    if param_hora in hora_remasterizada and param_date in date_remasterizada:
-        return {"status": 400}
-    else:
-        return {"status": 200}
     
     
 
