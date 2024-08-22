@@ -1,0 +1,4 @@
+Coisas para adicionar:
+
+1. Ler horarios disponíveis.
+2. colocar uma funcao para que só permita adicionar horarios que terminem em 30 ou em 00.

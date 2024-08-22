@@ -103,13 +103,7 @@ def verificar_horarios_disponivel(param_hora, param_date):
 
     return {"status": 200}
 
-    
-    
 
- #PROBLEMAS COM A VERIFICAÇÃO DA DATA:
-    #SE RETORNAR UM MES QUE NAO TENHA 2 NUMEROS EX(01/12), (02,02)
-    #IRÁ ADICIONAR INFINITAMENTE POIS NO BD FICA COM O 0, 
-    #FAZER ALGORITMO PARA ADICIONAR 0 CASO ESSES MESES NÃO TENHAM POR PADRÃO
 horario = '21:30'
 data = '10/5'
 # verificar_horarios_disponivel(horario, data)
