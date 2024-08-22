@@ -15,9 +15,9 @@ CORS(app)
 key = '05092006!'
 
 
-def validar_cpf(cpf_enviado_usuario):
+def validar_cpf(cpf_enviado):
     
-    nove_digitos = cpf_enviado_usuario[:9]
+    nove_digitos = cpf_enviado[:9]
     contador_regressivo_1 = 10
 
     resultado_digito_1 = 0
