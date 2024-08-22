@@ -77,10 +77,8 @@ def add_agendamento(data_agendamento, nome_agendamento, hora_agendamento, descri
         conexao.close()
 
     return "Dados inseridos com sucesso!"
-# READ
 
 def verificar_horarios_disponivel(param_hora, param_date):
-    # Conexão com o banco de dados
     conexao = mysql.connector.connect(
         host='localhost',
         user='root',
@@ -89,7 +87,6 @@ def verificar_horarios_disponivel(param_hora, param_date):
     )
     cursor = conexao.cursor()
 
-    # Consulta para obter data e hora dos agendamentos
     comando_select_agendamentos = """
         SELECT DATE_FORMAT(data, '%d/%m') AS data_formatada, 
                DATE_FORMAT(hora, '%H:%i') AS horario 
@@ -98,16 +95,13 @@ def verificar_horarios_disponivel(param_hora, param_date):
     cursor.execute(comando_select_agendamentos)
     resultados = cursor.fetchall()
 
-    # Lista de tuplas com as combinações de data e hora agendadas
     agendamentos = [(data, hora) for data, hora in resultados]
 
-    # Verificação da disponibilidade
     for data, hora in agendamentos:
         if param_date == data and param_hora == hora:
-            return {"status": 400}  # Horário indisponível
+            return {"status": 400}
 
-    # Se não encontrou conflito
-    return {"status": 200}  # Horário disponível
+    return {"status": 200}
 
     
     
