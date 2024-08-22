@@ -122,7 +122,7 @@ def verificar_horarios_disponivel(param_hora, param_date):
     else:
         return {"status": 200}
     
-
+    
 
  #PROBLEMAS COM A VERIFICAÇÃO DA DATA:
     #SE RETORNAR UM MES QUE NAO TENHA 2 NUMEROS EX(01/12), (02,02)
