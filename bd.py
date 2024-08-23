@@ -101,8 +101,3 @@ def verificar_horarios_disponivel(param_hora, param_date):
             return {"status": 400}
 
     return {"status": 200}
-
-
-horario = '21:30'
-data = '10/5'
-# verificar_horarios_disponivel(horario, data)

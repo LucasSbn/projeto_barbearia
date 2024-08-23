@@ -2,6 +2,9 @@ import bd
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from datetime import datetime
+
+
+
 # sistema de agendamento
 
 # usuário (GET/POST/DELETE/UPDATE)
@@ -52,13 +55,13 @@ def horario_permitido(hora):
     return True
 
 
-ex_dict = {
-    "nome_usuario": "lucas",
-    "senha_usuario": "12312",
-    "email_usuario": "lucas_sbn@outlook.com",
-    "cpf_usuario": 11876787406,
-    "tipo_usuario": "cliente" #cliente ou barbeiro
-}
+# ex_dict = {
+#     "nome_usuario": "lucas",
+#     "senha_usuario": "12312",
+#     "email_usuario": "lucas_sbn@outlook.com",
+#     "cpf_usuario": 11876787406,
+#     "tipo_usuario": "cliente" #cliente ou barbeiro
+# }
 
 
 # --nome,senha, email, cpf(opcional para usuario), tipo 
@@ -94,12 +97,12 @@ def add_user():
 
 
 
-ex_dict_agendamento = {
-    "data": "05/09",
-    "nome": "Lucas",
-    "hora": "12:00",
-    "descricao": "Corte americano"
-}
+# ex_dict_agendamento = {
+#     "data": "05/09",
+#     "nome": "Lucas",
+#     "hora": "12:00",
+#     "descricao": "Corte americano"
+# }
 
 # agendamentos
 # -- data e hora, id do barbeiro, id do usuário, status
@@ -176,3 +179,4 @@ def add_agendamento():
 
 if __name__ == '__main__':
     app.run(app.run(debug=True, threaded=True, host='0.0.0.0', port=8000))
+    
