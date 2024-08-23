@@ -1,6 +1,5 @@
 import mysql.connector
 import bcrypt
-from datetime import datetime
 
 def client_user(name_user, pass_user, mail_user, type_user, cpf_user=None):
     try:

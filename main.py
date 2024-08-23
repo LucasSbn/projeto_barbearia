@@ -35,11 +35,21 @@ def validar_data(data):
     
 def validar_hora(hora):
     try:
-        # Tenta converter a string para um objeto datetime com o formato HH:MM
+        if len(hora) != 5:
+            return False
+
         datetime.strptime(hora, '%H:%M')
         return True
     except ValueError:
         return False
+    
+def horario_permitido(hora):
+
+    hora_dividida = hora.split(':')
+    horarios_permitidos = ['30', '00']
+    if hora_dividida[1] not in horarios_permitidos:
+        return False
+    return True
 
 
 ex_dict = {
@@ -117,9 +127,7 @@ def add_agendamento():
 
     func_corte_disp = bd.verificar_horarios_disponivel(hora_agendamento, primeira_data_recebida)
     
-    print(func_corte_disp)
     status = func_corte_disp.get("status")
-    print(status, primeira_data_recebida)
     if status:
         if func_corte_disp["status"] == 400:
             return jsonify({
@@ -138,6 +146,12 @@ def add_agendamento():
             "data_invalida": primeira_data_recebida
         }), 400
     
+    if not horario_permitido(hora_agendamento):
+        return jsonify({
+            "error": "Horário inválido (horario deve terminar em [00 ou 30])",
+            "horario_invalido": hora_agendamento
+        }), 400
+
     if not validar_hora(hora_agendamento):
         return jsonify({
             "error": "Formato de hora inválido [HH:MM]",
