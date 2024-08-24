@@ -161,3 +161,4 @@ def ver_horario_disp(param_data, param_hora):
     finally:
         cursor.close()
         conexao.close()
+        
