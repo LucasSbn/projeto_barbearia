@@ -55,6 +55,7 @@ def horario_permitido(hora):
     return True
 
 
+
 # ex_dict = {
 #     "nome_usuario": "lucas",
 #     "senha_usuario": "12312",
@@ -167,7 +168,22 @@ def add_agendamento():
         "add_bd": bd.add_agendamento(data_recebida, nome_agendamento, hora_agendamento, descricao_agendamento, status_agendamento)
         }), 200
 
+@app.route('/ver_horario_disp', methods=['GET'])
+def veriricar_horarios_disponivel():
+    
+    dados = request.get_json()
+    data_recebida = dados.get('data')
+    hora_recebida = dados.get('hora')
 
+    if not horario_permitido(hora_recebida):
+        return jsonify({
+            "error": "Horário inválido (horario deve terminar em [00 ou 30])",
+            "horario_invalido": hora_recebida
+        }), 400
+    
+    resultado = bd.ver_horario_disp(data_recebida, hora_recebida)
+    bd.ver_horario_disp(data_recebida, hora_recebida)
+    return jsonify(resultado)
 
 
     
@@ -179,4 +195,3 @@ def add_agendamento():
 
 if __name__ == '__main__':
     app.run(app.run(debug=True, threaded=True, host='0.0.0.0', port=8000))
-    
