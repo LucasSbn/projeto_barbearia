@@ -1,3 +1,4 @@
 Coisas para adicionar:
 
 2. Apagar horários marcados.
+3. Marcar horário até 2 meses de antecedência
