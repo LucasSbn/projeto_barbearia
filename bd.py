@@ -45,6 +45,40 @@ def client_user(name_user, pass_user, mail_user, type_user, cpf_user=None):
     
     return "Dados inseridos com sucesso"
 
+def chamar_id(data_agendamento, hora_agendamento):
+    try:
+        conexao = mysql.connector.connect(
+            host='localhost',
+            user='root',
+            password='0511',
+            database='bd_barbearia'
+        )
+        cursor = conexao.cursor()
+
+        comando = f'SELECT id FROM tb_agendamento WHERE data = "{data_agendamento}" AND hora = "{hora_agendamento}"'
+        cursor.execute(comando)
+        resultado = cursor.fetchall() # Ler o banco de dados
+        resultado = resultado[0][0]
+
+    except mysql.connector.errors.ProgrammingError as e:
+        return {
+            "message": "o horario deve ser em formato de [HH:MM]",
+        }, 403
+    
+    finally:
+        cursor.close()
+        conexao.close
+
+    
+    if resultado:
+        return resultado
+    else: 
+        return {
+            "message": "agendamento não encontrado"
+        }, 400
+
+# print(chamar_id('andre das novinha', '23:00'))
+
 def add_agendamento(data_agendamento, nome_agendamento, hora_agendamento, descricao_agendamento, status_agendamento):
     try:
         conexao = mysql.connector.connect(
@@ -68,6 +102,8 @@ def add_agendamento(data_agendamento, nome_agendamento, hora_agendamento, descri
         cursor.execute(comando, parametros)
         conexao.commit()
 
+        # chamar_id(nome_agendamento, hora_agendamento)
+
 
     except mysql.connector.Error as err:
         return f"Erro: {err}"
@@ -76,7 +112,10 @@ def add_agendamento(data_agendamento, nome_agendamento, hora_agendamento, descri
         cursor.close()
         conexao.close()
 
-    return "Dados inseridos com sucesso!"
+    return {
+        "message": "Dados inseridos com sucesso!",
+        "id": f"o id deste corte é: {chamar_id(data_agendamento, hora_agendamento)}"
+    }, 200
 
 def verificar_horarios_disponivel(param_hora, param_date):
     conexao = mysql.connector.connect(
@@ -162,3 +201,34 @@ def ver_horario_disp(param_data, param_hora):
         cursor.close()
         conexao.close()
         
+
+def deletar_por_id(id_agendamento):
+    try:
+        conexao = mysql.connector.connect(
+            host='localhost',
+            user='root',
+            password='0511',
+            database='bd_barbearia'
+        )
+        cursor = conexao.cursor()
+
+        comando_verificar = 'SELECT id FROM tb_agendamento WHERE id = %s'
+        cursor.execute(comando_verificar, (id_agendamento,))
+        resultado = cursor.fetchone()
+
+        if resultado:
+            query_deletar = 'DELETE FROM tb_agendamento WHERE id = %s'
+            cursor.execute(query_deletar, (id_agendamento,))
+            conexao.commit()
+            return {"status": 200, "message": "Agendamento deletado com sucesso"}, 200
+        else:
+            return {"status": 404, "message": "Agendamento não encontrado"}, 404
+
+    except mysql.connector.Error as err:
+        return {"status": 500, "message": f"Erro: {err}"}, 500
+    finally:
+        cursor.close()
+        conexao.close()
+
+
+print(deletar_por_id(2))

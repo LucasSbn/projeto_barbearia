@@ -168,6 +168,12 @@ def add_agendamento():
         "add_bd": bd.add_agendamento(data_recebida, nome_agendamento, hora_agendamento, descricao_agendamento, status_agendamento)
         }), 200
 
+
+# ex_dict_verHorarioDisp = {
+#     "data": "03/01",
+#     "hora": "09:30"
+# }
+
 @app.route('/ver_horario_disp', methods=['GET'])
 def veriricar_horarios_disponivel():
     
@@ -185,6 +191,25 @@ def veriricar_horarios_disponivel():
     bd.ver_horario_disp(data_recebida, hora_recebida)
     return jsonify(resultado)
 
+
+
+@app.route('/deletar_agendamento', methods=['DELETE'])
+def deletar_agendamento():
+    try:
+        dados = request.get_json()
+        id_agendamento = dados.get('id_agendamento')
+        
+        if id_agendamento:
+            
+            resposta, status_code = bd.deletar_por_id(id_agendamento)
+            return jsonify(resposta), status_code
+        else:
+            return jsonify({"status": 400, "message": "Id do agendamento não fornecido"}), 400
+    
+    except TypeError:
+        return jsonify({"status": 500, "message": "Erro de tipo ocorrido"}), 500
+    except Exception as e:
+        return jsonify({"status": 500, "message": f"Erro ao deletar: {str(e)}"}), 500
 
     
 
