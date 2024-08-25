@@ -117,6 +117,8 @@ def add_user():
 # agendamentos
 # -- data e hora, id do barbeiro, id do usuário, status
 
+from datetime import datetime, timedelta
+
 @app.route('/add_agendamento', methods=['POST'])
 def add_agendamento():
     dados = request.get_json()
@@ -125,43 +127,43 @@ def add_agendamento():
     nome_agendamento = dados.get('nome')
     hora_agendamento = dados.get('hora')
     descricao_agendamento = dados.get('descricao')
-    status_agendamento = dados.get('status', 'P') # p = pendente // C = cancelado // F = finalizado // I = iniciado
+    status_agendamento = dados.get('status', 'P')  # P = pendente, C = cancelado, F = finalizado, I = iniciado
     ano_atual = datetime.now().year
-
-    data_recebida = primeira_data_recebida.split('/')
-    dia = data_recebida[0]
-    mes = data_recebida[1]
-
-    data_recebida = str(ano_atual) + '-' + str(mes) + '-' + str(dia)
 
     campos_necessarios = ['data', 'nome', 'hora', 'descricao']
     campos_ausentes = [campo for campo in campos_necessarios if dados.get(campo) is None]
-
-
-    func_corte_disp = bd.verificar_horarios_disponivel(hora_agendamento, primeira_data_recebida)
-    
-    status = func_corte_disp.get("status")
-    if status:
-        if func_corte_disp["status"] == 400:
-            return jsonify({
-                "message": "Horário indisponível"
-                }), 400
 
     if campos_ausentes:
         return jsonify({
             "error": "Dados ausentes",
             "campos_ausentes": campos_ausentes
         }), 400
-    
+
     if not validar_data(primeira_data_recebida):
         return jsonify({
             "error": "Formato de data inválido [DD/MM]",
             "data_invalida": primeira_data_recebida
         }), 400
+
+    # Verifica se a data está dentro dos próximos 2 meses
+    dia, mes = primeira_data_recebida.split('/')
+    data_agendada = datetime.strptime(f"{dia}/{mes}/{ano_atual}", '%d/%m/%Y')
     
+    data_atual = datetime.now()
+    
+    if data_agendada < data_atual:
+        data_agendada = datetime.strptime(f"{dia}/{mes}/{ano_atual + 1}", '%d/%m/%Y')
+    
+    data_limite = data_atual + timedelta(days=60)
+
+    if not (data_atual <= data_agendada <= data_limite):
+        return jsonify({
+            "error": f"A data de agendamento deve estar entre {data_atual.strftime('%d/%m/%Y')} e {data_limite.strftime('%d/%m/%Y')}."
+        }), 400
+
     if not horario_permitido(hora_agendamento):
         return jsonify({
-            "error": "Horário Indisponível",
+            "error": "Horário indisponível",
             "horario_invalido": hora_agendamento
         }), 400
 
@@ -171,11 +173,19 @@ def add_agendamento():
             "hora_invalida": hora_agendamento
         }), 400
 
- 
+    func_corte_disp = bd.verificar_horarios_disponivel(hora_agendamento, primeira_data_recebida)
+    if func_corte_disp.get("status") == 400:
+        return jsonify({
+            "message": "Horário indisponível"
+        }), 400
+
+    data_recebida = data_agendada.strftime('%Y-%m-%d')
+    bd.add_agendamento(data_recebida, nome_agendamento, hora_agendamento, descricao_agendamento, status_agendamento)
+
     return jsonify({
-        "message": "Adicionando ao banco de dados...",
-        "add_bd": bd.add_agendamento(data_recebida, nome_agendamento, hora_agendamento, descricao_agendamento, status_agendamento)
-        }), 200
+        "message": "Agendamento adicionado com sucesso!",
+    }), 200
+
 
 
 # ex_dict_verHorarioDisp = {

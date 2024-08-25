@@ -226,3 +226,7 @@ def deletar_por_id(id_agendamento):
     finally:
         cursor.close()
         conexao.close()
+
+
+mes_atual = datetime.now().month
+print(mes_atual)
