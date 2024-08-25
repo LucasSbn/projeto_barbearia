@@ -65,6 +65,7 @@ def horario_permitido(hora):
 @app.route('/add_user', methods=['POST'])
 def add_user():
     dados = request.get_json()
+
     nome_usuario = dados.get('nome_usuario')
     senha_usuario = dados.get('senha_usuario')
     email_usuario = dados.get('email_usuario')
@@ -80,17 +81,28 @@ def add_user():
             "campos_ausentes": campos_ausentes
         }), 400
 
+    if not all(isinstance(campo, str) for campo in [nome_usuario, senha_usuario, email_usuario, tipo_usuario, cpf_usuario]):
+        return jsonify({
+            "error": "Todos os campos devem ser strings", 
+            "tipos": {
+                "nome_usuario": type(nome_usuario).__name__,
+                "senha_usuario": type(senha_usuario).__name__,
+                "email_usuario": type(email_usuario).__name__,
+                "tipo_usuario": type(tipo_usuario).__name__,
+                "cpf_usuario": type(cpf_usuario).__name__,
+            }
+        }), 400
+
     if tipo_usuario.lower() == "barbeiro" and not cpf_usuario:
         return jsonify({
-                "message": "CPF necessário para barbeiros"
+                "error": "CPF necessário para barbeiros"
             }), 400
-    
-    
 
-    return jsonify({"message": "Adicionando ao banco de dados...",
-                    "add_bd": (bd.client_user(nome_usuario, senha_usuario, email_usuario, tipo_usuario, cpf_usuario)),
-                    "update": "Adicionado com sucesso!"
-                    })
+    return jsonify({
+        "message": "Adicionando ao banco de dados...",
+        "add_bd": bd.client_user(nome_usuario, senha_usuario, email_usuario, tipo_usuario, cpf_usuario),
+        "update": "Adicionado com sucesso!"
+    }), 200
 
 
 
@@ -211,6 +223,11 @@ def deletar_agendamento():
         return jsonify({"status": 500, "message": f"Erro ao deletar: {str(e)}"}), 500
 
 
+tipo_usuario = "1"
+senha_usuario = 1
+print(type(tipo_usuario), type(senha_usuario))
+if type(tipo_usuario) or type(senha_usuario) != str:
+    print(2)
 
 if __name__ == '__main__':
     app.run(app.run(debug=True, threaded=True, host='0.0.0.0', port=8000))
