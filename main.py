@@ -48,9 +48,13 @@ def validar_hora(hora):
     
 def horario_permitido(hora):
 
-    hora_dividida = hora.split(':')
-    horarios_permitidos = ['30', '00']
-    if hora_dividida[1] not in horarios_permitidos:
+    horarios = [
+    '08:00', '08:40', '09:20', '10:00', '10:40', '11:20', '12:00', '12:40', '13:20',
+    '14:00', '14:40', '15:20', '16:00', '16:40', '17:20', '18:00', '18:40', '19:20',
+    '20:00', '20:40', '21:20', '22:00'
+    ]
+
+    if hora not in horarios:
         return False
     return True
 
@@ -152,7 +156,7 @@ def add_agendamento():
     
     if not horario_permitido(hora_agendamento):
         return jsonify({
-            "error": "Horário inválido (horario deve terminar em [00 ou 30])",
+            "error": "Horário Indisponível",
             "horario_invalido": hora_agendamento
         }), 400
 
@@ -174,22 +178,37 @@ def add_agendamento():
 #     "hora": "09:30"
 # }
 
-@app.route('/ver_horario_disp', methods=['GET'])
-def veriricar_horarios_disponivel():
+# @app.route('/ver_horario_disp', methods=['GET'])
+# def veriricar_horarios_disponivel():
     
+#     dados = request.get_json()
+#     data_recebida = dados.get('data')
+#     hora_recebida = dados.get('hora')
+
+#     if not horario_permitido(hora_recebida):
+#         return jsonify({
+#             "error": "Horário inválido (horario deve terminar em [00 ou 30])",
+#             "horario_invalido": hora_recebida
+#         }), 400
+    
+#     resultado = bd.ver_horario_disp(data_recebida, hora_recebida)
+#     bd.ver_horario_disp(data_recebida, hora_recebida)
+#     return jsonify(resultado)
+
+@app.route('/ver_horarios_disponiveis', methods=['GET'])
+def verificar_horarios_disponiveis():
     dados = request.get_json()
     data_recebida = dados.get('data')
-    hora_recebida = dados.get('hora')
 
-    if not horario_permitido(hora_recebida):
-        return jsonify({
-            "error": "Horário inválido (horario deve terminar em [00 ou 30])",
-            "horario_invalido": hora_recebida
-        }), 400
+    # Verifica se a data foi fornecida corretamente
+    if not data_recebida:
+        return jsonify({"error": "Data não fornecida"}), 400
+
+    # Consulta os horários disponíveis no banco de dados
+    horarios_disponiveis = bd.ver_horarios_disponiveis(data_recebida)
     
-    resultado = bd.ver_horario_disp(data_recebida, hora_recebida)
-    bd.ver_horario_disp(data_recebida, hora_recebida)
-    return jsonify(resultado)
+    return jsonify(horarios_disponiveis)
+
 
 
 

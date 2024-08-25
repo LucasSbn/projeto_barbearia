@@ -1,5 +1,0 @@
-Coisas para adicionar:
-
-3. Marcar horário até 2 meses de antecedência
-3. funcao para ver horario disponivel no dia.
-4. funcao de funcionamento de 8 as 22 incorreta...
