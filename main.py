@@ -72,14 +72,21 @@ def add_user():
     tipo_usuario = dados.get('tipo_usuario')
     cpf_usuario = dados.get('cpf_usuario')
 
-    campos_necessarios = ['nome_usuario', 'senha_usuario', 'email_usuario', 'tipo_usuario']
-    campos_ausentes = [i for i in campos_necessarios if i not in dados]
+    campos_necessarios = ['nome_usuario', 'senha_usuario', 'email_usuario', 'tipo_usuario', 'cpf_usuario']
+    campos_ausentes = [campo for campo in campos_necessarios if dados.get(campo) is None]
 
     if campos_ausentes:
         return jsonify({
             "error": "Dados ausentes",
             "campos_ausentes": campos_ausentes
         }), 400
+
+    # Convertendo para string e verificando se todos os campos são strings
+    nome_usuario = str(nome_usuario) if nome_usuario is not None else ""
+    senha_usuario = str(senha_usuario) if senha_usuario is not None else ""
+    email_usuario = str(email_usuario) if email_usuario is not None else ""
+    tipo_usuario = str(tipo_usuario) if tipo_usuario is not None else ""
+    cpf_usuario = str(cpf_usuario) if cpf_usuario is not None else ""
 
     if not all(isinstance(campo, str) for campo in [nome_usuario, senha_usuario, email_usuario, tipo_usuario, cpf_usuario]):
         return jsonify({
@@ -103,6 +110,7 @@ def add_user():
         "add_bd": bd.client_user(nome_usuario, senha_usuario, email_usuario, tipo_usuario, cpf_usuario),
         "update": "Adicionado com sucesso!"
     }), 200
+
 
 
 
