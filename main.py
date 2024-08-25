@@ -193,6 +193,10 @@ def veriricar_horarios_disponivel():
 
 
 
+# ex_dict_deletar_agendamento ={
+#     "id_agendamento": 18
+# }
+
 @app.route('/deletar_agendamento', methods=['DELETE'])
 def deletar_agendamento():
     try:

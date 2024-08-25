@@ -1,7 +1,5 @@
 Coisas para adicionar:
 
-2. Apagar horários marcados.
 3. Marcar horário até 2 meses de antecedência
 3. funcao para ver horario disponivel no dia.
 4. funcao de funcionamento de 8 as 22 incorreta...
-5. a funcao delete está sempre retornando True se colocar o valor, precisa ajeitar isso
