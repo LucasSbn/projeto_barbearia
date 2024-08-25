@@ -101,6 +101,7 @@ def add_user():
 #     "descricao": "Corte americano"
 # }
 
+
 # agendamentos
 # -- data e hora, id do barbeiro, id do usuário, status
 
@@ -208,11 +209,6 @@ def deletar_agendamento():
         return jsonify({"status": 500, "message": "Erro de tipo ocorrido"}), 500
     except Exception as e:
         return jsonify({"status": 500, "message": f"Erro ao deletar: {str(e)}"}), 500
-
-    
-
-
-
 
 
 
