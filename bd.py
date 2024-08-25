@@ -57,7 +57,7 @@ def chamar_id(data_agendamento, hora_agendamento):
 
         comando = f'SELECT id FROM tb_agendamento WHERE data = "{data_agendamento}" AND hora = "{hora_agendamento}"'
         cursor.execute(comando)
-        resultado = cursor.fetchall() # Ler o banco de dados
+        resultado = cursor.fetchall()
         resultado = resultado[0][0]
 
     except mysql.connector.errors.ProgrammingError as e:
@@ -94,7 +94,7 @@ def add_agendamento(data_agendamento, nome_agendamento, hora_agendamento, descri
         cursor.fetchall()
 
         parametros = (data_agendamento, nome_agendamento, hora_agendamento, descricao_agendamento, status_agendamento)
-        # if parametros():
+
         comando = '''
             INSERT INTO tb_agendamento (data, nome, hora, descricao, status)
             VALUES (%s, %s, %s, %s, %s)
@@ -142,75 +142,14 @@ def verificar_horarios_disponivel(param_hora, param_date):
 
     return {"status": 200}
 
-
-# funcao para ver horario disponivel\
-# primeiro, verificar o horário disponível
-
-#lista para fazer a verificacao
 horarios = [
     '08:00', '08:40', '09:20', '10:00', '10:40', '11:20', '12:00', '12:40', '13:20',
     '14:00', '14:40', '15:20', '16:00', '16:40', '17:20', '18:00', '18:40', '19:20',
     '20:00', '20:40', '21:20', '21:40'
     ]
 
-# def ver_horario_disp(param_data, param_hora):
-#     try:
-#         conexao = mysql.connector.connect(
-#             host='localhost',
-#             user='root',
-#             password='0511',
-#             database='bd_barbearia'
-#         )
-#         cursor = conexao.cursor()
-    
-
-#         query = "SELECT data, hora FROM tb_agendamento"
-
-#         cursor.execute(query)
-
-#         resultados = cursor.fetchall()
-
-#         formatted_results = []
-#         for data, hora in resultados:
-#             data_str = data.strftime('%d/%m')
-#             if isinstance(hora, timedelta):
-#                 total_seconds = int(hora.total_seconds())
-#                 hours = total_seconds // 3600
-#                 minutes = (total_seconds % 3600) // 60
-#                 hora_str = f"{hours:02}:{minutes:02}"
-#             else:
-#                 hora_str = str(hora)
-                  
-#             formatted_results.append(f"{data_str} - {hora_str}")
-        
-#         for list_horario in formatted_results:
-#             if list_horario in horarios:
-#                 horarios.remove(list_horario)
-
-
-#         param_concatenado = f'{param_data} - {param_hora}'
-        
-#         if param_concatenado in formatted_results:
-#             return {"status": 400, "message": "Horário indisponível"}
-#         else:
-#             return {"status": 200, "message": "Horário disponível"}
-        
-
-
-#     except mysql.connector.Error as err:
-#         return f"Erro: {err}"
-    
-#     finally:
-#         cursor.close()
-#         conexao.close()
-
-from datetime import datetime
-
-from datetime import datetime
-
 def ver_horarios_disponiveis(param_data):
     try:
-        # Converte a data de 'DD/MM' para 'YYYY-MM-DD'
         ano_atual = datetime.now().year
         data_formatada = datetime.strptime(f"{param_data}/{ano_atual}", '%d/%m/%Y').strftime('%Y-%m-%d')
 
@@ -222,12 +161,10 @@ def ver_horarios_disponiveis(param_data):
         )
         cursor = conexao.cursor()
 
-        # Query agora utiliza a data formatada corretamente
         query = "SELECT hora FROM tb_agendamento WHERE data = %s"
         cursor.execute(query, (data_formatada,))
         resultados = cursor.fetchall()
 
-        # Formata os horários ocupados
         horarios_ocupados = []
         for (hora,) in resultados:
             if isinstance(hora, timedelta):
@@ -239,14 +176,12 @@ def ver_horarios_disponiveis(param_data):
                 hora_str = str(hora)
             horarios_ocupados.append(hora_str)
 
-        # Gera todos os horários possíveis com dois dígitos nas horas e minutos
         horarios_totais = [
         '08:00', '08:40', '09:20', '10:00', '10:40', '11:20', '12:00', '12:40', '13:20',
         '14:00', '14:40', '15:20', '16:00', '16:40', '17:20', '18:00', '18:40', '19:20',
         '20:00', '20:40', '21:20', '22:00'
         ]
 
-        # Filtra os horários disponíveis
         horarios_disponiveis = [horario for horario in horarios_totais if horario not in horarios_ocupados]
         
         return {

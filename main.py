@@ -4,14 +4,6 @@ from flask_cors import CORS
 from datetime import datetime
 
 
-
-# sistema de agendamento
-
-# usuário (GET/POST/DELETE/UPDATE)
-# babeiro (GET/POST/DELETE/UPDATE)
-
-
-
 app = Flask(__name__)
 CORS(app)
 
@@ -177,23 +169,6 @@ def add_agendamento():
 #     "data": "03/01",
 #     "hora": "09:30"
 # }
-
-# @app.route('/ver_horario_disp', methods=['GET'])
-# def veriricar_horarios_disponivel():
-    
-#     dados = request.get_json()
-#     data_recebida = dados.get('data')
-#     hora_recebida = dados.get('hora')
-
-#     if not horario_permitido(hora_recebida):
-#         return jsonify({
-#             "error": "Horário inválido (horario deve terminar em [00 ou 30])",
-#             "horario_invalido": hora_recebida
-#         }), 400
-    
-#     resultado = bd.ver_horario_disp(data_recebida, hora_recebida)
-#     bd.ver_horario_disp(data_recebida, hora_recebida)
-#     return jsonify(resultado)
 
 @app.route('/ver_horarios_disponiveis', methods=['GET'])
 def verificar_horarios_disponiveis():
