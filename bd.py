@@ -227,6 +227,28 @@ def deletar_por_id(id_agendamento):
         cursor.close()
         conexao.close()
 
+def cortes_executados_dia(param_data):
+    try:
+        conexao = mysql.connector.connect(
+            host='localhost',
+            user='root',
+            password='0511',
+            database='bd_barbearia'
+        )
+        cursor = conexao.cursor()
 
-mes_atual = datetime.now().month
-print(mes_atual)
+        comando = """
+        SELECT DATE_FORMAT(data, "%d/%m") AS data_formatada, status 
+        FROM tb_agendamento
+        WHERE status = 'F' AND DATE_FORMAT(data, "%d/%m") = %s;
+        """
+
+        cursor.execute(comando, (param_data,))
+        resultado = cursor.fetchall()
+
+        return len(resultado)
+
+    finally:
+        # Fecha o cursor e a conexão
+        cursor.close()
+        conexao.close()

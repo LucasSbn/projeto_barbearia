@@ -2,7 +2,7 @@ import bd
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from datetime import datetime
-
+import json
 
 app = Flask(__name__)
 CORS(app)
@@ -240,12 +240,30 @@ def deletar_agendamento():
     except Exception as e:
         return jsonify({"status": 500, "message": f"Erro ao deletar: {str(e)}"}), 500
 
+@app.route('/cortes_do_dia', methods=['POST'])
+def cortes_do_dia():
+    try:
+        dados = request.get_json()
+    except json.JSONDecodeError:
+        return jsonify({"error": "Falha ao decodificar JSON. Verifique o formato dos dados."}), 400
+    
+    if not dados or 'data' not in dados:
+        return jsonify({"error": "Data não fornecida"}), 400
+    
+    data_recebida = dados.get('data')
+    
+    try:
+        quantidade_cortes = bd.cortes_executados_dia(data_recebida)
+    except Exception as e:
+        return jsonify({"error": f"Erro no servidor: {str(e)}"}), 500
+    
+    if quantidade_cortes == 0:
+        return jsonify({"message": "Nenhum corte executado para essa data"}), 404
 
-tipo_usuario = "1"
-senha_usuario = 1
-print(type(tipo_usuario), type(senha_usuario))
-if type(tipo_usuario) or type(senha_usuario) != str:
-    print(2)
+    return jsonify({
+        "Quantidade de cortes": quantidade_cortes
+    }), 200
 
+        
 if __name__ == '__main__':
     app.run(app.run(debug=True, threaded=True, host='0.0.0.0', port=8000))
