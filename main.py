@@ -3,9 +3,6 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from datetime import datetime
 import json
-from celery import Celery
-
-app_celery = Celery('tarefas', broker='redis://localhost:6379/0')
 
 app = Flask(__name__)
 CORS(app)
