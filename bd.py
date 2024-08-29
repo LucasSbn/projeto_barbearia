@@ -249,6 +249,6 @@ def cortes_executados_dia(param_data):
         return len(resultado)
 
     finally:
-        # Fecha o cursor e a conexão
         cursor.close()
         conexao.close()
+

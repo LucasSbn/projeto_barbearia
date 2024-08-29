@@ -3,6 +3,9 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from datetime import datetime
 import json
+from celery import Celery
+
+app_celery = Celery('tarefas', broker='redis://localhost:6379/0')
 
 app = Flask(__name__)
 CORS(app)
@@ -264,6 +267,24 @@ def cortes_do_dia():
         "Quantidade de cortes": quantidade_cortes
     }), 200
 
-        
+@app.route("/mudar_status", methods=['POST'])
+def mudar_status():
+    try:
+        dados = request.get_json()
+        hora = dados.get('hora')
+        data = datetime.now().date()
+        # Fazer funcao para ao passar a hora do corte, o barbeiro poderá mudar automaticamente o status do corte para F (finalizado) ou I (iniciado)
+
+        return jsonify({
+            "dados": hora,
+            "data": data
+        })
+    
+    except json.JSONDecodeError:
+        return jsonify({
+            "error": "Falha ao decodificar JSON. Verifique o formato dos dados."
+        }), 400
+
+
 if __name__ == '__main__':
     app.run(app.run(debug=True, threaded=True, host='0.0.0.0', port=8000))
