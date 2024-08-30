@@ -268,9 +268,9 @@ def cortes_do_dia():
 def mudar_status():
     try:
         dados = request.get_json()
-        param_hora = dados.get('hora')
+        param_hora = str(dados.get('hora'))
         param_status = str(dados.get('status'))
-        param_data = dados.get('data')
+        param_data = str(dados.get('data'))
 
         if not validar_hora(param_hora):
             return jsonify({
@@ -283,7 +283,20 @@ def mudar_status():
                 "error": "Formato de data inválido [DD/MM]",
                 "data_invalida": param_data
             }), 400
-
+        
+        resultado = bd.resultado_horario(param_data)
+        if param_hora in resultado:
+            return jsonify({
+                "message": "Este horario não está marcado",
+                "status": 405
+            }), 405
+        
+        if not horario_permitido(param_hora):
+            return jsonify({
+                "error": "Horário inválido",
+                "horario_invalido": param_hora
+            }), 403
+        
         status_permitidos = ['P', 'C', 'F', 'I']
         if param_status.upper() not in status_permitidos:
             return {"status": 400, "message": "Status inválido"}, 400

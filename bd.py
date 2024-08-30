@@ -197,8 +197,6 @@ def ver_horarios_disponiveis(param_data):
         conexao.close()
 
 
-
-
 def deletar_por_id(id_agendamento):
     try:
         conexao = mysql.connector.connect(
@@ -243,6 +241,8 @@ def cortes_executados_dia(param_data):
         WHERE status = 'F' AND DATE_FORMAT(data, "%d/%m") = %s;
         """
 
+        query_verificar_horario = ...
+
         cursor.execute(comando, (param_data,))
         resultado = cursor.fetchall()
 
@@ -252,7 +252,14 @@ def cortes_executados_dia(param_data):
         cursor.close()
         conexao.close()
 
+def resultado_horario(param_data):       
+    resultado = ver_horarios_disponiveis(param_data)
+    if isinstance(resultado, dict):
+        horario_disponivel = resultado.get("horarios_disponiveis", [])
+        return horario_disponivel
+    
 
+# colocar a funcao  como uma variavel e depois dar o nome da variavel.get() e puxar o que eu desejo
 def att_status(status, param_data, param_hora):
     try:
         conexao = mysql.connector.connect(
@@ -262,7 +269,7 @@ def att_status(status, param_data, param_hora):
             database='bd_barbearia'
             )
         cursor = conexao.cursor()
-
+        
         param_data = param_data.replace('/', '-')
         ano_atual = datetime.now().year
         data_completa = f'{ano_atual}-{param_data}'
@@ -273,9 +280,14 @@ def att_status(status, param_data, param_hora):
                 """
         cursor.execute(query, (status.upper(), data_sql, param_hora))
         conexao.commit()
+        return {
+            "sucesso": True,
+            "status": 200
+        }
     finally:
         cursor.close()
         conexao.close()
+
 
 print(att_status("P", "20/06", "8:00"))
 
