@@ -268,14 +268,31 @@ def cortes_do_dia():
 def mudar_status():
     try:
         dados = request.get_json()
-        hora = dados.get('hora')
-        data = datetime.now().date()
-        # Fazer funcao para ao passar a hora do corte, o barbeiro poderá mudar automaticamente o status do corte para F (finalizado) ou I (iniciado)
+        param_hora = dados.get('hora')
+        param_status = str(dados.get('status'))
+        param_data = dados.get('data')
 
-        return jsonify({
-            "dados": hora,
-            "data": data
-        })
+        if not validar_hora(param_hora):
+            return jsonify({
+                "error": "Formato de hora inválido [HH:MM]",
+                "hora_invalida": param_hora
+            }), 400
+
+        if not validar_data(param_data):
+            return jsonify({
+                "error": "Formato de data inválido [DD/MM]",
+                "data_invalida": param_data
+            }), 400
+
+        status_permitidos = ['P', 'C', 'F', 'I']
+        if param_status.upper() not in status_permitidos:
+            return {"status": 400, "message": "Status inválido"}, 400
+        else:
+            
+            bd.att_status(param_status, param_data, param_hora)
+            return {"status": 200, 
+                    "message": "Status atualizado com sucesso"
+                    }, 200
     
     except json.JSONDecodeError:
         return jsonify({

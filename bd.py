@@ -252,3 +252,40 @@ def cortes_executados_dia(param_data):
         cursor.close()
         conexao.close()
 
+
+def att_status(status, param_data, param_hora):
+    try:
+        conexao = mysql.connector.connect(
+            host='localhost',
+            user='root',
+            password='0511',
+            database='bd_barbearia'
+            )
+        cursor = conexao.cursor()
+        
+        # COLOCAR NO MAIN
+        # status_permitidos = ['P', 'C', 'F', 'I']
+        # if status.upper() not in status_permitidos:
+        #     return {"status": 400, "message": "Status inválido"}, 400
+
+        param_data = param_data.replace('/', '-')
+        ano_atual = datetime.now().year
+        data_completa = f'{ano_atual}-{param_data}'
+        data_sql = datetime.strptime(data_completa, '%Y-%d-%m').strftime('%Y-%m-%d')
+
+        query = """ UPDATE tb_agendamento SET status = %s 
+                    WHERE data = %s AND HORA = %s
+                """
+        cursor.execute(query, (status.upper(), data_sql, param_hora))
+        conexao.commit()
+
+        # COLOCAR NO MAIN
+        # return {"status": 200, 
+        #         "message": "Status atualizado com sucesso"
+        #         }, 200
+    finally:
+        cursor.close()
+        conexao.close()
+
+print(att_status("P", "20/06", "8:00"))
+
