@@ -287,7 +287,3 @@ def att_status(status, param_data, param_hora):
     finally:
         cursor.close()
         conexao.close()
-
-
-print(att_status("P", "20/06", "8:00"))
-

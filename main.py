@@ -1,14 +1,44 @@
 import bd
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 
 app = Flask(__name__)
 CORS(app)
 
-key = '05092006!'
+def calcular_intervalo():
+    hoje = datetime.now()
+    inicio = hoje.replace(day=1)
 
+    # Ajustar fim para incluir três meses, ao invés de dois
+    if inicio.month == 11:  # Se for novembro, fim será em fevereiro do próximo ano
+        fim = inicio.replace(year=inicio.year + 1, month=2, day=28)
+    elif inicio.month == 12:  # Se for dezembro, fim será em março do próximo ano
+        fim = inicio.replace(year=inicio.year + 1, month=3, day=31)
+    else:
+        # Adicionar 3 meses ao início
+        fim = inicio.replace(month=(inicio.month % 12) + 3, day=1) - timedelta(days=1)
+
+    return inicio.strftime("%d/%m/%Y"), fim.strftime("%d/%m/%Y")
+
+def listar_domingos():
+    inicio_str, fim_str = calcular_intervalo()
+    inicio = datetime.strptime(inicio_str, "%d/%m/%Y")
+    fim = datetime.strptime(fim_str, "%d/%m/%Y")
+    dia_atual = inicio
+
+    while dia_atual.weekday() != 6:
+        dia_atual += timedelta(days=1)
+
+    domingos = []
+    while dia_atual <= fim:
+        domingos.append(dia_atual.strftime("%d/%m"))
+        dia_atual += timedelta(days=7)
+
+    return domingos
+
+lista_dias_domingo = listar_domingos()
 
 def validar_data(data):
     try:
@@ -49,7 +79,6 @@ def horario_permitido(hora):
     if hora not in horarios:
         return False
     return True
-
 
 
 # ex_dict = {
@@ -163,6 +192,11 @@ def add_agendamento():
         data_agendada = datetime.strptime(f"{dia}/{mes}/{ano_atual + 1}", '%d/%m/%Y')
     
     data_limite = data_atual + timedelta(days=60)
+
+    if primeira_data_recebida in lista_dias_domingo:
+        return {
+            "error": "Não é possível agendar no domingo"
+        }
 
     if not (data_atual <= data_agendada <= data_limite):
         return jsonify({
@@ -311,7 +345,6 @@ def mudar_status():
         return jsonify({
             "error": "Falha ao decodificar JSON. Verifique o formato dos dados."
         }), 400
-
 
 if __name__ == '__main__':
     app.run(app.run(debug=True, threaded=True, host='0.0.0.0', port=8000))
