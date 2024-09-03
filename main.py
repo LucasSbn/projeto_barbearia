@@ -346,5 +346,23 @@ def mudar_status():
             "error": "Falha ao decodificar JSON. Verifique o formato dos dados."
         }), 400
 
+
+@app.route('/falar_barbeiro', methods=["GET"])
+def falar_barbeiro():
+    try:
+        dados = request.get_json()
+        pergunta = str(dados.get("pergunta", ""))
+        pergunta = pergunta.lower()
+        horario = ["horario", "horário", "horarios", "horários"]
+        preco = ["preço", "preco", "preços", "precos"]
+        if any(word in pergunta for word in horario):
+            return {"resposta": "Para ver os horário disponíveis, consute 'Ver horários disponíveis' e passe uma data "}, 200
+        elif any(word in pergunta for word in preco):
+            return {"resposta": "O corte custa R$25."}, 200
+        else:
+            return {"resposta": "Fale com o barbeiro. Numero: 998659687"}, 200
+    except TypeError or AttributeError:
+        return {"resposta": "ocorreu algum error durante o processo..."}
+
 if __name__ == '__main__':
     app.run(app.run(debug=True, threaded=True, host='0.0.0.0', port=8000))
