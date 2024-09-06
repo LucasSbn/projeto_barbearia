@@ -160,6 +160,7 @@ from datetime import datetime, timedelta
 def add_agendamento():
     dados = request.get_json()
 
+
     primeira_data_recebida = dados.get('data')
     nome_agendamento = dados.get('nome')
     hora_agendamento = dados.get('hora')
