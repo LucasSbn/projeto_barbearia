@@ -117,6 +117,7 @@ def add_agendamento(data_agendamento, nome_agendamento, hora_agendamento, descri
         "id": f"o id deste corte é: {chamar_id(data_agendamento, hora_agendamento)}"
     }, 200
 
+
 def verificar_horarios_disponivel(param_hora, param_date):
     conexao = mysql.connector.connect(
         host='localhost',
@@ -287,3 +288,15 @@ def att_status(status, param_data, param_hora):
     finally:
         cursor.close()
         conexao.close()
+        
+        
+exemplo_dict = {
+    'nome': 'Lucas',
+    'idade': 30,
+    'cidade': 'São Paulo',
+    'profissao': 'Desenvolvedor',
+    'ativo': True
+}
+
+for chave, valor in exemplo_dict.items():
+    print(chave, valor)

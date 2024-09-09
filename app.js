@@ -2,6 +2,8 @@ const fs = require('fs');
 const wppconnect = require('@wppconnect-team/wppconnect');
 
 const AUTHORIZED_USER_ID = '558198659687@c.us'; // ID do usuário autorizado
+const axios = require('axios');
+
 
 wppconnect
   .create({
@@ -29,45 +31,59 @@ wppconnect
   .then((client) => start(client))
   .catch((error) => console.error('Erro ao iniciar WPPConnect: ', error));
 
-  function start(client) {
-    client.onMessage((message) => {
-      console.log(message.from, "////", AUTHORIZED_USER_ID)
-      if (message.from === AUTHORIZED_USER_ID) {
-        // Verifica se a mensagem é de texto
-        if (message.body) {
-          console.log('Mensagem recebida: ', message.body);
+  async function obterHorariosDisponiveis(data) {
+    const token = '415a85b9c3fc0af8bf051c9a77ee8ab4';
+  
+    try {
+        const response = await axios.get('http://127.0.0.1:8000/ver_horarios_disponiveis', 
+        {
+            headers: {
+                'Authorization': token,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            params: {
+                data: data
+            }
+        });
+  
+        console.log('Resposta da API:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('Erro ao obter horários disponíveis:', error);
+    }
+  }
 
-          // Verifica se o corpo da mensagem contém 'pix'
-          if (message.body.toLowerCase().includes('pix')) {
-            client
-              .sendText(message.from, 'Manda a chave, vou te mandar 200')
-              .then((result) => {
-                console.log('Resultado: ', result); // Sucesso
-              })
-              .catch((erro) => {
-                console.error('Erro ao enviar: ', erro); // Erro
-              });
+  function start(client) {
+      console.log('Cliente WPPConnect iniciado com sucesso!');
+      
+      obterHorariosDisponiveis('05/09').then((dados) => {
+          if (dados) {
+              // Converte o objeto para uma string JSON
+              const jsonString = JSON.stringify(dados);
+              
+              // Converte a string JSON de volta para um objeto
+              const dadosObj = JSON.parse(jsonString);
+              
+              // Constrói a mensagem iterando sobre o objeto
+              let mensagem = 'Horários disponíveis:\n';
+              if (dadosObj.data) {
+                  mensagem += `Data: ${dadosObj.data}\n\n`;
+              }
+              if (Array.isArray(dadosObj.horarios_disponiveis)) {
+                  mensagem += dadosObj.horarios_disponiveis.map(horario => `- ${horario}`).join('\n');
+              } else {
+                  console.error('Formato inesperado para horários_disponiveis:', dadosObj.horarios_disponiveis);
+                  mensagem += 'Formato inesperado para horários disponíveis.';
+              }
+              
+              console.log('Enviando mensagem:', mensagem);
+              
+              client.sendText(AUTHORIZED_USER_ID, mensagem)
+                  .then(() => console.log('Mensagem enviada com sucesso!'))
+                  .catch((error) => console.error('Erro ao enviar mensagem:', error));
+          } else {
+              console.log('Nenhum dado disponível para enviar.');
           }
-        } else {
-          // Resposta se não for texto
-          client
-            .sendText(message.from, 'Sua mensagem não foi do tipo texto')
-            .then((result) => {
-              console.log('Resultado: ', result); // Sucesso
-            })
-            .catch((erro) => {
-              console.error('Erro ao enviar: ', erro); // Erro
-            });
-        }
-      } else {
-        client
-          .sendText(message.from, 'Você não está autorizado a enviar mensagens para este bot.')
-          .then((result) => {
-            console.log('Resultado ao enviar mensagem a usuário não autorizado: ', result); // Mostra o resultado da operação
-          })
-          .catch((erro) => {
-            console.error('Erro ao enviar mensagem a usuário não autorizado: ', erro); // Mostra o erro
-          });
-      }
-    });
+      }).catch((error) => console.error('Erro ao obter horários disponíveis:', error));
   }

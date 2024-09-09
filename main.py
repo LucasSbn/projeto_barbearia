@@ -3,9 +3,12 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from datetime import datetime, timedelta
 import json
+import secrets
 
 app = Flask(__name__)
 CORS(app)
+
+TOKEN = '415a85b9c3fc0af8bf051c9a77ee8ab4'
 
 def calcular_intervalo():
     hoje = datetime.now()
@@ -153,9 +156,6 @@ def add_user():
 
 # agendamentos
 # -- data e hora, id do barbeiro, id do usuário, status
-
-from datetime import datetime, timedelta
-
 @app.route('/add_agendamento', methods=['POST'])
 def add_agendamento():
     dados = request.get_json()
@@ -238,8 +238,12 @@ def add_agendamento():
 
 @app.route('/ver_horarios_disponiveis', methods=['GET'])
 def verificar_horarios_disponiveis():
-    dados = request.get_json()
-    data_recebida = dados.get('data')
+    token = request.headers.get('Authorization')
+    if token != TOKEN:
+        return jsonify({"error": "Token inválido"}), 403
+
+    # Obtém o parâmetro 'data' da URL (usando GET)
+    data_recebida = request.args.get('data')
 
     # Verifica se a data foi fornecida corretamente
     if not data_recebida:
@@ -249,9 +253,6 @@ def verificar_horarios_disponiveis():
     horarios_disponiveis = bd.ver_horarios_disponiveis(data_recebida)
     
     return jsonify(horarios_disponiveis)
-
-
-
 
 # ex_dict_deletar_agendamento ={
 #     "id_agendamento": 18
