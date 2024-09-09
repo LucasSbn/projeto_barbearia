@@ -7,7 +7,7 @@ const axios = require('axios');
 
 wppconnect
   .create({
-    session: 'sessionName',
+    session: 'meu_celular',
     catchQR: (base64Qr, asciiQR) => {
       console.log(asciiQR); // Opcional: log do QR no terminal
       const matches = base64Qr.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
@@ -57,7 +57,7 @@ wppconnect
   function start(client) {
       console.log('Cliente WPPConnect iniciado com sucesso!');
       
-      obterHorariosDisponiveis('05/09').then((dados) => {
+      obterHorariosDisponiveis('20/06').then((dados) => {
           if (dados) {
               // Converte o objeto para uma string JSON
               const jsonString = JSON.stringify(dados);
