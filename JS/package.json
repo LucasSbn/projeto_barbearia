@@ -1,0 +1,15 @@
+{
+  "name": "projeto_barbearia",
+  "version": "1.0.0",
+  "description": "Este projeto é um sistema de agendamento para uma barbearia, desenvolvido em Python utilizando Flask e MySQL. O sistema permite que os clientes agendem horários para cortes de cabelo, e os funcionários podem gerenciar esses agendamentos, verificando os horários disponíveis e o número de cortes realizados em um dia específico.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@wppconnect-team/wppconnect": "^1.34.0"
+  }
+}
