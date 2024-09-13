@@ -6,3 +6,4 @@ wppconnect-server/
 package.json/
 wppconnect-server
 server.ts/
+src/
