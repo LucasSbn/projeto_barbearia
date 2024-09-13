@@ -4,11 +4,15 @@ from flask_cors import CORS
 from datetime import datetime, timedelta
 import json
 import secrets
+import requests
+
+
+# -> npm start
+# -> session
+# -> $2b$10$MfgziwWxF8msRGgA1z1E_OHJdeyUd9rO0bzhBc7PRaBzNjKjZutSm
 
 app = Flask(__name__)
 CORS(app)
-
-TOKEN = '415a85b9c3fc0af8bf051c9a77ee8ab4'
 
 def calcular_intervalo():
     hoje = datetime.now()
@@ -238,10 +242,6 @@ def add_agendamento():
 
 @app.route('/ver_horarios_disponiveis', methods=['GET'])
 def verificar_horarios_disponiveis():
-    token = request.headers.get('Authorization')
-    if token != TOKEN:
-        return jsonify({"error": "Token inválido"}), 403
-
     # Obtém o parâmetro 'data' da URL (usando GET)
     data_recebida = request.args.get('data')
 
@@ -355,6 +355,11 @@ def falar_barbeiro():
         dados = request.get_json()
         pergunta = str(dados.get("pergunta", ""))
         pergunta = pergunta.lower()
+        url = 'http://localhost:21465/api/session/all-new-messages'
+        response = requests.get(url)
+        data_from_server_3 = response.json()
+
+        print('Dados do Servidor 3:', data_from_server_3)
         horario = ["horario", "horário", "horarios", "horários"]
         preco = ["preço", "preco", "preços", "precos"]
         if any(word in pergunta for word in horario):
@@ -368,3 +373,5 @@ def falar_barbeiro():
 
 if __name__ == '__main__':
     app.run(app.run(debug=True, threaded=True, host='0.0.0.0', port=8000))
+
+

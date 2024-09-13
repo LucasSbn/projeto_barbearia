@@ -297,6 +297,3 @@ exemplo_dict = {
     'profissao': 'Desenvolvedor',
     'ativo': True
 }
-
-for chave, valor in exemplo_dict.items():
-    print(chave, valor)
