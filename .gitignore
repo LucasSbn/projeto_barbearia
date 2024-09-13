@@ -4,5 +4,5 @@ tokens/
 __pycache__/
 wppconnect-server/
 package.json/
-wppconnect-server/
+wppconnect-server
 server.ts/
