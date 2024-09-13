@@ -6,7 +6,7 @@ import json
 import secrets
 import requests
 
-# -> teste
+# -> testea
 # -> npm start
 # -> session
 # -> $2b$10$MfgziwWxF8msRGgA1z1E_OHJdeyUd9rO0bzhBc7PRaBzNjKjZutSm
