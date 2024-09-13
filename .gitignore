@@ -3,3 +3,6 @@ node_modules/
 tokens/
 __pycache__/
 wppconnect-server/
+package.json/
+wppconnect-server/
+server.ts/
