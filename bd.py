@@ -297,3 +297,20 @@ exemplo_dict = {
     'profissao': 'Desenvolvedor',
     'ativo': True
 }
+
+
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+
+@app.route('/webhook/new-message', methods=['POST'])
+def new_message():
+    if request.is_json:
+        message_data = request.json
+        print('Nova mensagem recebida:', message_data)
+        return jsonify({'status': 'Mensagem recebida com sucesso'}), 200
+    else:
+        return jsonify({'error': 'Tipo de conteúdo não suportado'}), 415
+
+if __name__ == '__main__':
+    app.run(port=5000)
