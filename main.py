@@ -370,6 +370,32 @@ def falar_barbeiro():
             return {"resposta": "Fale com o barbeiro. Numero: 998659687"}, 200
     except TypeError or AttributeError:
         return {"resposta": "ocorreu algum error durante o processo..."}
+    
+@app.route('/send-message', methods=["POST"])
+def enviar_mensagem():
+    url = "http://localhost:21465/api/session/send-message"
+    header = {
+        "Authorization": "Bearer $2b$10$MfgziwWxF8msRGgA1z1E_OHJdeyUd9rO0bzhBc7PRaBzNjKjZutSm",
+        "Content-Type": "application/json"
+    }
+    data = {
+        "phone": "558195782112",
+        "isGroup": False,
+        "isNewsletter": False,
+        "message": "bot funcioando!"
+    }
+    responsi = requests.post(url, headers=header, data=json.dumps(data))
+    if responsi.status_code in [200, 201, 202, 203, 204, 205]:
+        print('Requisição bem-sucedida')
+        return {"status": "success", "message": "Mensagem enviada com sucesso"}, 200
+    else:
+        # Exibir a mensagem de erro retornada pela API WPPConnect
+        return {
+            "status": "fail", 
+            "message": f"Erro ao enviar mensagem. Código de status: {responsi.status_code}. Detalhes: {responsi.text}"
+        }, responsi.status_code
+
+
 
 if __name__ == '__main__':
     app.run(app.run(debug=True, threaded=True, host='0.0.0.0', port=8000))
