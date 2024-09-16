@@ -374,30 +374,44 @@ def falar_barbeiro():
 @app.route('/send-message', methods=["POST"])
 def enviar_mensagem():
     url = "http://localhost:21465/api/session/send-message"
-    header = {
+    headers = {
         "Authorization": "Bearer $2b$10$MfgziwWxF8msRGgA1z1E_OHJdeyUd9rO0bzhBc7PRaBzNjKjZutSm",
         "Content-Type": "application/json"
     }
     data = {
-        "phone": "558195782112",
+        "phone": "558198659687",
         "isGroup": False,
         "isNewsletter": False,
-        "message": "bot funcioando!"
+        "message": "bot funcionando!"
     }
-    responsi = requests.post(url, headers=header, data=json.dumps(data))
-    if responsi.status_code in [200, 201, 202, 203, 204, 205]:
+
+    response = requests.post(url, headers=headers, data=json.dumps(data))
+    
+    if response.status_code in [200, 201, 202, 203, 204, 205]:
         print('Requisição bem-sucedida')
         return {"status": "success", "message": "Mensagem enviada com sucesso"}, 200
     else:
-        # Exibir a mensagem de erro retornada pela API WPPConnect
         return {
             "status": "fail", 
-            "message": f"Erro ao enviar mensagem. Código de status: {responsi.status_code}. Detalhes: {responsi.text}"
-        }, responsi.status_code
+            "message": f"Erro ao enviar mensagem. Código de status: {response.status_code}. Detalhes: {response.text}"
+        }, response.status_code
 
+nome_sujo = input("Digite o número 2: ")
+if nome_sujo == "2":
+    url2 = "http://localhost:21465/api/session/send-message"
+    headers = {
+        "Authorization": "Bearer $2b$10$MfgziwWxF8msRGgA1z1E_OHJdeyUd9rO0bzhBc7PRaBzNjKjZutSm",
+        "Content-Type": "application/json"
+    }
+    data = {
+        "phone": "558198659687",
+        "isGroup": False,
+        "isNewsletter": False,
+        "message": "bot funcionando!"
+    }
 
-
+    response = requests.post(url2, headers=headers, data=json.dumps(data))
 if __name__ == '__main__':
-    app.run(app.run(debug=True, threaded=True, host='0.0.0.0', port=8000))
+    app.run(debug=True, threaded=True, host='0.0.0.0', port=8000)
 
 
