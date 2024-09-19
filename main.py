@@ -396,22 +396,112 @@ def enviar_mensagem():
             "message": f"Erro ao enviar mensagem. Código de status: {response.status_code}. Detalhes: {response.text}"
         }, response.status_code
 
-nome_sujo = input("Digite o número 2: ")
-if nome_sujo == "2":
-    url2 = "http://localhost:21465/api/session/send-message"
-    headers = {
-        "Authorization": "Bearer $2b$10$MfgziwWxF8msRGgA1z1E_OHJdeyUd9rO0bzhBc7PRaBzNjKjZutSm",
-        "Content-Type": "application/json"
-    }
-    data = {
-        "phone": "558198659687",
-        "isGroup": False,
-        "isNewsletter": False,
-        "message": "bot funcionando!"
-    }
+# nome_sujo = input("Digite o número 2: ")
+# if nome_sujo == "2":
+#     url2 = "http://localhost:21465/api/session/send-message"
+#     headers = {
+#         "Authorization": "Bearer $2b$10$MfgziwWxF8msRGgA1z1E_OHJdeyUd9rO0bzhBc7PRaBzNjKjZutSm",
+#         "Content-Type": "application/json"
+#     }
+#     data = {
+#         "phone": "558198659687",
+#         "isGroup": False,
+#         "isNewsletter": False,
+#         "message": "bot funcionando!"
+#     }
 
-    response = requests.post(url2, headers=headers, data=json.dumps(data))
+#     response = requests.post(url2, headers=headers, data=json.dumps(data))
+
+@app.route('/webhook', methods=['POST'])
+def webhook():
+
+    # Verifica se a requisição tem formato JSON
+    if not request.is_json:
+        return jsonify({'error': 'Invalid Content-Type. JSON expected'}), 400
+    
+    try:
+        data = request.get_json()
+        evento_msg = data['event']
+        # print(evento_msg, "oioioio")
+        if evento_msg == 'onmessage':
+            body = data.get('body')
+
+            remetente = data.get('id')
+            remetente = remetente.split('@')[0]
+
+            print(remetente)
+            print(data)
+
+            url2 = "http://localhost:21465/api/session/send-message"
+            headers = {
+                "Authorization": "Bearer $2b$10$MfgziwWxF8msRGgA1z1E_OHJdeyUd9rO0bzhBc7PRaBzNjKjZutSm",
+                "Content-Type": "application/json"
+            }
+            data = {
+                "phone": f"{remetente}",
+                "isGroup": False,
+                "isNewsletter": False,
+                "message": "Teste Bot."
+            }
+            requests.post(url2, headers=headers, data=json.dumps(data))
+
+            
+            if "oi bb" in body:
+                celular = ...
+                
+
+                url3 = "http://localhost:21465/api/session/send-list-message"
+                headers = {
+                    "Authorization": "Bearer $2b$10$MfgziwWxF8msRGgA1z1E_OHJdeyUd9rO0bzhBc7PRaBzNjKjZutSm",
+                    "Content-Type": "application/json"
+                }
+
+                data2 = {
+                    "phone": f"{celular}",
+                    "isGroup": False,
+                    "description": "ATENDIMENTO AO CLIENTE",
+                    "buttonText": "Escolha o que você deseja fazer",
+                    "sections": [
+                        {
+                        "title": "O QUE VOCÊ QUER?",
+                        "rows": [
+                            {
+                            "rowId": "1",
+                            "title": "Prosseguir com o atendimento.",
+                            "description": "Marcar cortes / Editar Horário / Apagar agendamento / Ver Cortes do dia"
+                            },
+                            {
+                            "rowId": "2",
+                            "title": "Falar com Bruno",
+                            "description": "Desejo resolver algo pessoal com bruno."
+                            }
+                        ]
+                        }
+                    ]
+                    }
+                
+                requests.post(url3, headers=headers, data=json.dumps(data2))
+
+
+            
+            
+        return jsonify({'status': 'sucesso'}), 200
+    except Exception as e:
+        return jsonify({'error': f'Failed to decode JSON: {str(e)}'}), 400
+
+
 if __name__ == '__main__':
     app.run(debug=True, threaded=True, host='0.0.0.0', port=8000)
 
 
+
+'''
+conversas_ativas = {id: modulo_que_parou}
+modulo = [
+    {
+       "modulo": 1,
+       "id": numero,
+       "proximo_modulo" : 2,  
+    }
+]
+'''
