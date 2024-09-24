@@ -298,10 +298,9 @@ exemplo_dict = {
     'ativo': True
 }
 
-# Função para verificar se o número já foi respondido no banco de dados
 def verificar_numero_respondido(numero):
     conn = mysql.connector.connect(
-        host="localhost",  # Altere conforme sua configuração
+        host="localhost",
         user="root",
         password="0511",
         database="bd_barbearia"
@@ -316,22 +315,21 @@ def verificar_numero_respondido(numero):
     
     return resultado[0] > 0  # Retorna True se o número já estiver no banco
 
-
 def marcar_numero_respondido(numero):
     try:
-
         conn = mysql.connector.connect(
-                host='localhost',
-                user='root',
-                password='0511',
-                database='bd_barbearia'
-                )
+            host='localhost',
+            user='root',
+            password='0511',
+            database='bd_barbearia'
+        )
         cursor = conn.cursor()
         data_resposta = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            
-        query = "INSERT INTO mensagens_respondidas (numero, data_resposta) VALUES (%s, %s)"
-        print(f"Inserindo número {numero} e data {data_resposta} no banco de dados.")
-        cursor.execute(query, (numero, data_resposta))
+        modulo_atual = "1"
+        
+        query = "INSERT INTO mensagens_respondidas (numero, data_resposta, modulo_atual) VALUES (%s, %s, %s)"
+        print(f"Inserindo número {numero}, data {data_resposta} e modulo atual {modulo_atual} no banco de dados.")
+        cursor.execute(query, (numero, data_resposta, modulo_atual))
         conn.commit()
 
         print(f"Número {numero} foi inserido com sucesso no banco de dados.")
@@ -341,3 +339,90 @@ def marcar_numero_respondido(numero):
         print(f"Erro ao inserir no banco de dados: {str(err)}")
     except Exception as e:
         print(f"Erro inesperado ao salvar o número no banco: {str(e)}")
+
+
+def remover_numero_inativo():
+    try:
+        conn = mysql.connector.connect(
+            host='localhost',
+            user='root',
+            password='0511',
+            database='bd_barbearia'
+        )
+        cursor = conn.cursor()
+        limite_tempo = datetime.now() - timedelta(minutes=1)
+        
+        query = "DELETE FROM mensagens_respondidas WHERE data_resposta < %s"
+        cursor.execute(query, (limite_tempo.strftime('%Y-%m-%d %H:%M:%S'),))
+        conn.commit()
+
+        print(f"Números inativos foram removidos do banco de dados.")
+        
+        conn.close()
+    except mysql.connector.Error as err:
+        print(f"Erro ao remover números inativos no banco de dados: {str(err)}")
+    except Exception as e:
+        print(f"Erro inesperado ao remover números inativos no banco: {str(e)}")
+
+# Para usar a função remover_numero_inativo, você pode chamá-la em um intervalo específico ou em momentos apropriados no seu código.
+
+def obter_modulo_por_numero(numero):
+    conn = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="0511",
+        database="bd_barbearia"
+    )
+    cursor = conn.cursor()
+
+    query = "SELECT modulo_atual FROM mensagens_respondidas WHERE numero = %s"
+    cursor.execute(query, (numero,))
+    resultado = cursor.fetchone()
+    
+    conn.close()
+    
+    # Verifica se o resultado foi encontrado e retorna o modulo_atual
+    if resultado:
+        modulo_atual = resultado[0]
+        return modulo_atual
+    else:
+        return None  # Caso não encontre o número na tabela
+
+# Exemplo de uso
+numero = '558197100205@c.us'
+modulo_numero = obter_modulo_por_numero(numero)
+print(modulo_numero)
+
+
+
+
+def deletar_numeros_antigos():
+    try:
+        conn = mysql.connector.connect(
+            host="localhost",  # Altere conforme sua configuração
+            user="root",
+            password="0511",
+            database="bd_barbearia"
+        )
+        cursor = conn.cursor()
+        
+        # Calcula o tempo limite de 5 minutos atrás
+        tempo_limite = datetime.now() - timedelta(minutes=1)
+        tempo_limite_str = tempo_limite.strftime('%Y-%m-%d %H:%M:%S')
+        
+        # Deleta registros onde data_resposta é menor que o tempo limite
+        query = "DELETE FROM mensagens_respondidas WHERE data_resposta < %s"
+        cursor.execute(query, (tempo_limite_str,))
+        
+        # Commit para confirmar as alterações
+        conn.commit()
+        
+        # Imprime a quantidade de registros deletados
+        print(f"Números antigos deletados: {cursor.rowcount}")
+        
+        conn.close()
+
+    except mysql.connector.Error as err:
+        print(f"Erro ao deletar no banco de dados: {str(err)}")
+    except Exception as e:
+        print(f"Erro inesperado ao deletar no banco: {str(e)}")

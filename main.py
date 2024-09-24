@@ -450,13 +450,14 @@ def enviar_resposta(numero, mensagem):
     return response.status_code
 
 
+
 def processar_mensagem(data):
     try:
+        bd.deletar_numeros_antigos()
         # Verifica se o evento é 'onmessage'
         evento = data.get('event')
         if evento == 'onmessage':
             print("Evento de mensagem recebido.")
-
             # Verifica se 'sender' e 'id' estão presentes e válidos
             sender = data.get('sender', {})
             numero = sender.get('id') or data.get('from')
@@ -467,13 +468,15 @@ def processar_mensagem(data):
 
             print(f"Processando mensagem do número: {numero}")
 
-            # Verifica se o número já foi respondido
-            # if bd.verificar_numero_respondido(numero):
-            #     print(f"Mensagem já enviada para o número {numero}. Ignorando.")
-            #     return  # Não envia a mensagem novamente
+            if not data.get('isGroupMsg', False):
 
-            # Marca o número como respondido no banco de dados
-            # bd.marcar_numero_respondido(numero)
+                # Verifica se o número já foi respondido
+                if bd.verificar_numero_respondido(numero):
+                    print(f"Mensagem já enviada para o número {numero}. Ignorando.")
+                    return  # Não envia a mensagem novamente
+
+                # Marca o número como respondido no banco de dados
+                bd.marcar_numero_respondido(numero)
 
             # Verifica se é uma mensagem de grupo
             if data.get('isGroupMsg', False):
@@ -498,14 +501,14 @@ def processar_mensagem(data):
     except Exception as e:
         print(f"Erro ao processar a mensagem: {str(e)}")
         return 500
-
-
-@app.route('/webhook', methods=['POST'])
-def webhook_primeira_mensagem():
+modulo_1 = "/webhook/modulo-1"
+@app.route(modulo_1, methods=['POST'])
+def webhook():
     try:
         data = request.json
         if data.get('event') == 'onmessage':
             print(f"Dados recebidos no webhook: {data}")  # Para debug
+            ...
 
         status = processar_mensagem(data)
 
@@ -516,8 +519,10 @@ def webhook_primeira_mensagem():
         return jsonify({'status': 'Mensagem processada com sucesso'}), status or 200
 
     except KeyError as e:
+        print(e)
         return jsonify({'status': 'Chave ausente no corpo da requisição', 'error': str(e)}), 400
     except Exception as e:
+        print(e)
         return jsonify({'status': 'Erro ao processar a mensagem', 'error': str(e)}), 500
 
 
