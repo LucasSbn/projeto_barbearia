@@ -3,7 +3,6 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from datetime import datetime, timedelta
 import json
-import secrets
 import requests
 
 
@@ -371,6 +370,7 @@ def falar_barbeiro():
     except TypeError or AttributeError:
         return {"resposta": "ocorreu algum error durante o processo..."}
     
+#so vai funcionar se eu usar essa requisicao no postman (testar se está funcionando o bot)
 @app.route('/send-message', methods=["POST"])
 def enviar_mensagem():
     url = "http://localhost:21465/api/session/send-message"
@@ -396,98 +396,260 @@ def enviar_mensagem():
             "message": f"Erro ao enviar mensagem. Código de status: {response.status_code}. Detalhes: {response.text}"
         }, response.status_code
 
-# nome_sujo = input("Digite o número 2: ")
-# if nome_sujo == "2":
-#     url2 = "http://localhost:21465/api/session/send-message"
-#     headers = {
-#         "Authorization": "Bearer $2b$10$MfgziwWxF8msRGgA1z1E_OHJdeyUd9rO0bzhBc7PRaBzNjKjZutSm",
-#         "Content-Type": "application/json"
-#     }
-#     data = {
-#         "phone": "558198659687",
-#         "isGroup": False,
-#         "isNewsletter": False,
-#         "message": "bot funcionando!"
-#     }
 
-#     response = requests.post(url2, headers=headers, data=json.dumps(data))
+# Conjunto para armazenar os números que já receberam resposta
+numeros_respondidos = set()
+
+def enviar_ordem(numero):
+    api_url = "http://localhost:21465/api/session/send-list-message"
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $2b$10$MfgziwWxF8msRGgA1z1E_OHJdeyUd9rO0bzhBc7PRaBzNjKjZutSm"
+    }
+    payload = {
+        "phone": numero,
+        "isGroup": False,
+        "description": "Desc for list",
+        "buttonText": "Select a option",
+        "sections": [
+                {
+                "title": "Section 1",
+                "rows": [
+                    {
+                    "rowId": "my_custom_id",
+                    "title": "Test 1"
+                    },
+                    {
+                    "rowId": "2",
+                    "title": "Test 2"
+                    }
+                ]
+                }
+            ]
+}
+    response = requests.post(api_url, json=payload, headers=headers)
+
+    print(f"Status Code: {response.status_code}")
+    print(f"Response Text: {response.text}")
+
+    return response.status_code, response.text
+
+
+def enviar_resposta(numero, mensagem):
+    api_url = "http://localhost:21465/api/session/send-message"
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $2b$10$MfgziwWxF8msRGgA1z1E_OHJdeyUd9rO0bzhBc7PRaBzNjKjZutSm"
+    }
+    payload = {
+        "phone": numero,
+        "message": mensagem,
+        "isGroup": False
+    }
+    response = requests.post(api_url, json=payload, headers=headers)
+    return response.status_code
+
+
+def processar_mensagem(data):
+    try:
+        # Verifica se o evento é 'onmessage'
+        evento = data.get('event')
+        if evento == 'onmessage':
+            print("Evento de mensagem recebido.")
+
+            # Verifica se 'sender' e 'id' estão presentes e válidos
+            sender = data.get('sender', {})
+            numero = sender.get('id') or data.get('from')
+
+            if not numero:
+                print("Dados do remetente inválidos ou faltando.")
+                return None  # Interrompe o processamento da mensagem se não houver remetente válido
+
+            print(f"Processando mensagem do número: {numero}")
+
+            # Verifica se o número já foi respondido
+            # if bd.verificar_numero_respondido(numero):
+            #     print(f"Mensagem já enviada para o número {numero}. Ignorando.")
+            #     return  # Não envia a mensagem novamente
+
+            # Marca o número como respondido no banco de dados
+            # bd.marcar_numero_respondido(numero)
+
+            # Verifica se é uma mensagem de grupo
+            if data.get('isGroupMsg', False):
+                print("Mensagem ignorada: é uma mensagem de grupo.")
+                return  # Ignora a mensagem de grupo
+
+            # Envia uma resposta simples
+            resposta = "Olá! Como posso ajudar?"
+            status_resposta = enviar_resposta(numero, resposta)
+
+            print(f"Status de resposta enviada para {numero}: {status_resposta}")
+
+            # Envia a ordem (lista de opções)
+            status_ordem, resposta_ordem = enviar_ordem(numero)
+            print(f"Status do envio da ordem: {status_ordem}, Resposta: {resposta_ordem}")
+            
+            return status_resposta  # Retorna o status da resposta original
+        else:
+            # Evento não reconhecido
+            print(f"Evento '{evento}' não é uma mensagem ou não foi reconhecido.")
+            return None
+    except Exception as e:
+        print(f"Erro ao processar a mensagem: {str(e)}")
+        return 500
+
 
 @app.route('/webhook', methods=['POST'])
-def webhook():
-
-    # Verifica se a requisição tem formato JSON
-    if not request.is_json:
-        return jsonify({'error': 'Invalid Content-Type. JSON expected'}), 400
-    
+def webhook_primeira_mensagem():
     try:
-        data = request.get_json()
-        evento_msg = data['event']
-        # print(evento_msg, "oioioio")
-        if evento_msg == 'onmessage':
-            body = data.get('body')
+        data = request.json
+        if data.get('event') == 'onmessage':
+            print(f"Dados recebidos no webhook: {data}")  # Para debug
 
-            remetente = data.get('id')
-            remetente = remetente.split('@')[0]
+        status = processar_mensagem(data)
 
-            print(remetente)
-            print(data)
+        # Se o status for None, o evento não foi processado
+        if status is None:
+            return jsonify({'status': 'Evento ignorado'}), 200
 
-            url2 = "http://localhost:21465/api/session/send-message"
-            headers = {
-                "Authorization": "Bearer $2b$10$MfgziwWxF8msRGgA1z1E_OHJdeyUd9rO0bzhBc7PRaBzNjKjZutSm",
-                "Content-Type": "application/json"
-            }
-            data = {
-                "phone": f"{remetente}",
-                "isGroup": False,
-                "isNewsletter": False,
-                "message": "Teste Bot."
-            }
-            requests.post(url2, headers=headers, data=json.dumps(data))
+        return jsonify({'status': 'Mensagem processada com sucesso'}), status or 200
 
-            
-            if "oi bb" in body:
-                celular = ...
-                
-
-                url3 = "http://localhost:21465/api/session/send-list-message"
-                headers = {
-                    "Authorization": "Bearer $2b$10$MfgziwWxF8msRGgA1z1E_OHJdeyUd9rO0bzhBc7PRaBzNjKjZutSm",
-                    "Content-Type": "application/json"
-                }
-
-                data2 = {
-                    "phone": f"{celular}",
-                    "isGroup": False,
-                    "description": "ATENDIMENTO AO CLIENTE",
-                    "buttonText": "Escolha o que você deseja fazer",
-                    "sections": [
-                        {
-                        "title": "O QUE VOCÊ QUER?",
-                        "rows": [
-                            {
-                            "rowId": "1",
-                            "title": "Prosseguir com o atendimento.",
-                            "description": "Marcar cortes / Editar Horário / Apagar agendamento / Ver Cortes do dia"
-                            },
-                            {
-                            "rowId": "2",
-                            "title": "Falar com Bruno",
-                            "description": "Desejo resolver algo pessoal com bruno."
-                            }
-                        ]
-                        }
-                    ]
-                    }
-                
-                requests.post(url3, headers=headers, data=json.dumps(data2))
-
-
-            
-            
-        return jsonify({'status': 'sucesso'}), 200
+    except KeyError as e:
+        return jsonify({'status': 'Chave ausente no corpo da requisição', 'error': str(e)}), 400
     except Exception as e:
-        return jsonify({'error': f'Failed to decode JSON: {str(e)}'}), 400
+        return jsonify({'status': 'Erro ao processar a mensagem', 'error': str(e)}), 500
+
+
+
+    
+    '''
+            {
+                "event":"onmessage",
+                "session":"session",
+                "id":"false_558196701767@c.us_3AB4EB53229F1DCC4A7B",
+                "viewed":false,
+                "body":"Jajajs",
+                "type":"chat",
+                "t":1726872632,
+                "notifyName":"Gilvando Xavier",
+                "from":"558196701767@c.us",
+                "to":"558198659687@c.us",
+                "ack":1,
+                "invis":false,
+                "isNewMsg":true,
+                "star":false,
+                "kicNotified":false,
+                "recvFresh":true,
+                "isFromTemplate":false,
+                "pollInvalidated":false,
+                "isSentCagPollCreation":false,
+                "latestEditMsgKey":"None",
+                "latestEditSenderTimestampMs":"None",
+                "mentionedJidList":[
+                    
+                ],
+                "groupMentions":[
+                    
+                ],
+                "isEventCanceled":false,
+                "eventInvalidated":false,
+                "isVcardOverMmsDocument":false,
+                "isForwarded":false,
+                "hasReaction":false,
+                "messageSecret":{
+                    "0":140,
+                    "1":132,
+                    "2":197,
+                    "3":39,
+                    "4":85,
+                    "5":14,
+                    "6":40,
+                    "7":218,
+                    "8":26,
+                    "9":26,
+                    "10":32,
+                    "11":127,
+                    "12":63,
+                    "13":143,
+                    "14":239,
+                    "15":117,
+                    "16":237,
+                    "17":179,
+                    "18":92,
+                    "19":73,
+                    "20":226,
+                    "21":10,
+                    "22":243,
+                    "23":226,
+                    "24":218,
+                    "25":190,
+                    "26":110,
+                    "27":72,
+                    "28":57,
+                    "29":161,
+                    "30":222,
+                    "31":16
+                },
+                "productHeaderImageRejected":false,
+                "lastPlaybackProgress":0,
+                "isDynamicReplyButtonsMsg":false,
+                "isCarouselCard":false,
+                "parentMsgId":"None",
+                "isMdHistoryMsg":false,
+                "stickerSentTs":0,
+                "isAvatar":false,
+                "lastUpdateFromServerTs":0,
+                "invokedBotWid":"None",
+                "bizBotType":"None",
+                "botResponseTargetId":"None",
+                "botPluginType":"None",
+                "botPluginReferenceIndex":"None",
+                "botPluginSearchProvider":"None",
+                "botPluginSearchUrl":"None",
+                "botPluginSearchQuery":"None",
+                "botPluginMaybeParent":false,
+                "botReelPluginThumbnailCdnUrl":"None",
+                "botMsgBodyType":"None",
+                "requiresDirectConnection":"None",
+                "bizContentPlaceholderType":"None",
+                "hostedBizEncStateMismatch":false,
+                "senderOrRecipientAccountTypeHosted":false,
+                "placeholderCreatedWhenAccountIsHosted":false,
+                "chatId":"558196701767@c.us",
+                "fromMe":false,
+                "sender":{
+                    "id":"558196701767@c.us",
+                    "name":"Gil",
+                    "shortName":"Gil",
+                    "pushname":"Gilvando Xavier",
+                    "type":"in",
+                    "isBusiness":false,
+                    "isEnterprise":false,
+                    "isSmb":false,
+                    "isContactSyncCompleted":1,
+                    "textStatusLastUpdateTime":-1,
+                    "syncToAddressbook":true,
+                    "formattedName":"Gil",
+                    "isMe":false,
+                    "isMyContact":true,
+                    "isPSA":false,
+                    "isUser":true,
+                    "isWAContact":true,
+                    "profilePicThumbObj":{
+                        "id":"558196701767@c.us"
+                    },
+                    "msgs":"None"
+                },
+                "timestamp":1726872632,
+                "content":"Jajajs",
+                "isGroupMsg":false,
+                "mediaData":{
+                    
+                }
+                }
+    '''
+
 
 
 if __name__ == '__main__':
@@ -505,3 +667,29 @@ modulo = [
     }
 ]
 '''
+
+                # data2 = {
+                #     "phone": f"{celular}",
+                #     "isGroup": False,
+                #     "description": "ATENDIMENTO AO CLIENTE",
+                #     "buttonText": "Escolha o que você deseja fazer",
+                #     "sections": [
+                #         {
+                #         "title": "O QUE VOCÊ QUER?",
+                #         "rows": [
+                #             {
+                #             "rowId": "1",
+                #             "title": "Prosseguir com o atendimento.",
+                #             "description": "Marcar cortes / Editar Horário / Apagar agendamento / Ver Cortes do dia"
+                #             },
+                #             {
+                #             "rowId": "2",
+                #             "title": "Falar com Bruno",
+                #             "description": "Desejo resolver algo pessoal com bruno."
+                #             }
+                #         ]
+                #         }
+                #     ]
+                #     }
+                
+                # requests.post(url3, headers=headers, data=json.dumps(data2))

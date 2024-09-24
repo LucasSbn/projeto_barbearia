@@ -298,19 +298,46 @@ exemplo_dict = {
     'ativo': True
 }
 
+# Função para verificar se o número já foi respondido no banco de dados
+def verificar_numero_respondido(numero):
+    conn = mysql.connector.connect(
+        host="localhost",  # Altere conforme sua configuração
+        user="root",
+        password="0511",
+        database="bd_barbearia"
+    )
+    cursor = conn.cursor()
+    
+    query = "SELECT COUNT(*) FROM mensagens_respondidas WHERE numero = %s"
+    cursor.execute(query, (numero,))
+    resultado = cursor.fetchone()
+    
+    conn.close()
+    
+    return resultado[0] > 0  # Retorna True se o número já estiver no banco
 
-from flask import Flask, request, jsonify
 
-app = Flask(__name__)
+def marcar_numero_respondido(numero):
+    try:
 
-@app.route('/webhook/new-message', methods=['POST'])
-def new_message():
-    if request.is_json:
-        message_data = request.json
-        print('Nova mensagem recebida:', message_data)
-        return jsonify({'status': 'Mensagem recebida com sucesso'}), 200
-    else:
-        return jsonify({'error': 'Tipo de conteúdo não suportado'}), 415
+        conn = mysql.connector.connect(
+                host='localhost',
+                user='root',
+                password='0511',
+                database='bd_barbearia'
+                )
+        cursor = conn.cursor()
+        data_resposta = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            
+        query = "INSERT INTO mensagens_respondidas (numero, data_resposta) VALUES (%s, %s)"
+        print(f"Inserindo número {numero} e data {data_resposta} no banco de dados.")
+        cursor.execute(query, (numero, data_resposta))
+        conn.commit()
 
-if __name__ == '__main__':
-    app.run(port=5000)
+        print(f"Número {numero} foi inserido com sucesso no banco de dados.")
+        
+        conn.close()
+    except mysql.connector.Error as err:
+        print(f"Erro ao inserir no banco de dados: {str(err)}")
+    except Exception as e:
+        print(f"Erro inesperado ao salvar o número no banco: {str(e)}")
